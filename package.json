@@ -33,9 +33,6 @@
     "build:esm": "bunx tsup",
     "example": "bun run --watch examples/index.ts"
   },
-  "dependencies": {
-    "ts-deepmerge": "^6.0.3"
-  },
   "devDependencies": {
     "@biomejs/biome": "^1.5.3",
     "@devjskit/copy-files": "^1.0.0",
