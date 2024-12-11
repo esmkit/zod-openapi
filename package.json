@@ -1,55 +1,54 @@
 {
   "name": "@esmkit/zod-openapi",
   "version": "0.1.0",
-  "description": "Converts a zod schema to an OpenAPI",
+  "description": "Convert Zod Schemas to OpenAPI v3.x documentation",
   "author": "Billgo <hi@billgo.me>",
   "bugs": "https://github.com/esmkit/zod-openapi/issues",
   "license": "MIT",
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "types",
     "README.md"
   ],
   "exports": {
     ".": {
-      "bun": "./dist/index.js",
-      "node": "./dist/index.cjs",
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.cjs"
-    }
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    },
+    "./*": "./*"
   },
   "scripts": {
     "prepublishOnly": "bun run build",
-    "test": "bun run test:functionality && bun run test:types",
-    "test:functionality": "bun test",
-    "test:types": "tsc --project tsconfig.test.json",
     "build": "bunx rimraf dist && bun run build:esm && bun run build:bun",
     "build:bun": "bun run bun.build.mjs",
     "build:esm": "bunx tsup",
-    "example": "bun run --watch examples/index.ts"
+    "start": "bun run --watch examples/index.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.5.3",
-    "@devjskit/copy-files": "^1.0.0",
+    "@biomejs/biome": "1.9.4",
+    "@devjskit/biome-config": "^0.1.14",
+    "@devjskit/copy-files": "^1.1.1",
     "@devjskit/kill-port": "^1.0.0",
     "@devjskit/rimraf": "^1.0.0",
-    "@types/bun": "^1.0.5",
-    "@types/node": "^20.10.6",
-    "@types/web": "^0.0.132",
-    "openapi3-ts": "^4.2.1",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.3",
-    "validator": "^13.11.0",
-    "zod": "^3.22.4"
+    "@types/bun": "^1.1.14",
+    "@types/node": "^22.10.1",
+    "@types/web": "^0.0.186",
+    "openapi3-ts": "^4.4.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "validator": "^13.12.0",
+    "zod": "^3.24.0"
   },
   "peerDependencies": {
-    "openapi3-ts": "^2.0.0 || ^3.0.0",
-    "zod": "^3.20.0"
+    "zod": "*"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
