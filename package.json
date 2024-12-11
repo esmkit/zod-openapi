@@ -8,10 +8,7 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "files": ["dist", "README.md"],
   "exports": {
     ".": {
       "require": {
@@ -31,6 +28,9 @@
     "build:bun": "bun run bun.build.mjs",
     "build:esm": "bunx tsup",
     "start": "bun run --watch examples/index.ts"
+  },
+  "dependencies": {
+    "yaml": "2.6.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
