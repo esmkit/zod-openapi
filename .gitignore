@@ -107,3 +107,4 @@ uploads/
 outputs/
 
 webstorm.config.js
+**/*.snap
