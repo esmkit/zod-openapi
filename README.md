@@ -59,7 +59,6 @@ Use the `.openapi()` method to add metadata to a specific Zod type. The `.openap
 Creates an OpenAPI documentation object
 
 ```typescript
-import '@esmkit/zod-openapi/extend';
 import { z } from 'zod';
 import { createDocument } from '@esmkit/zod-openapi';
 
@@ -199,7 +198,6 @@ const document = createDocument(details, {
 Creates an OpenAPI Schema Object along with any registered components. OpenAPI 3.1.0 Schema Objects are fully compatible with JSON Schema.
 
 ```typescript
-import '@esmkit/zod-openapi/extend';
 import { z } from 'zod';
 import { createSchema } from '@esmkit/zod-openapi';
 
