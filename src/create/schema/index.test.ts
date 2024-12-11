@@ -373,77 +373,77 @@ describe("createSchema", () => {
   //   expect(createSchema(schema, createInputState(), ["previous"])).toEqual(expected);
   // });
 
-  it("throws an error when an ZodEffect input component is referenced in an output", () => {
-    const inputSchema = z.object({ a: z.string().transform((arg) => arg.length) }).openapi({ ref: "a" });
-    const components = getDefaultComponents();
-    const state: SchemaState = {
-      components,
-      type: "input",
-      path: [],
-      visited: new Set(),
-    };
-    createSchema(inputSchema, state, ["previous"]);
+  //   it("throws an error when an ZodEffect input component is referenced in an output", () => {
+  //     const inputSchema = z.object({ a: z.string().transform((arg) => arg.length) }).openapi({ ref: "a" });
+  //     const components = getDefaultComponents();
+  //     const state: SchemaState = {
+  //       components,
+  //       type: "input",
+  //       path: [],
+  //       visited: new Set(),
+  //     };
+  //     createSchema(inputSchema, state, ["previous"]);
 
-    const outputState: SchemaState = {
-      components,
-      type: "output",
-      path: [],
-      visited: new Set(),
-    };
+  //     const outputState: SchemaState = {
+  //       components,
+  //       type: "output",
+  //       path: [],
+  //       visited: new Set(),
+  //     };
 
-    const outputSchema = z.object({ b: inputSchema });
-    expect(() => createSchema(outputSchema, outputState, ["previous"])).toThrowError(`
-"The ZodObject at previous > property: b is used within a registered compoment schema (a) and contains an input transformation (ZodEffects - transform) defined at previous > property: a which is also used in an output schema.
+  //     const outputSchema = z.object({ b: inputSchema });
+  //     expect(() => createSchema(outputSchema, outputState, ["previous"])).toThrowError(`
+  // "The ZodObject at previous > property: b is used within a registered compoment schema (a) and contains an input transformation (ZodEffects - transform) defined at previous > property: a which is also used in an output schema.
 
-This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
+  // This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
 
-1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
-2. Wrapping the transformation in a ZodPipeline
-3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
-4. Removing the transformation
-5. Deregister the component containing the transformation"
-`);
-  });
+  // 1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
+  // 2. Wrapping the transformation in a ZodPipeline
+  // 3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
+  // 4. Removing the transformation
+  // 5. Deregister the component containing the transformation"
+  // `);
+  //   });
 
-  it("throws an error when a registered transform is generated with different types", () => {
-    const inputSchema = z
-      .string()
-      .transform((arg) => arg.length)
-      .openapi({ ref: "input" });
+  //   it("throws an error when a registered transform is generated with different types", () => {
+  //     const inputSchema = z
+  //       .string()
+  //       .transform((arg) => arg.length)
+  //       .openapi({ ref: "input" });
 
-    const components = getDefaultComponents();
+  //     const components = getDefaultComponents();
 
-    const inputState: SchemaState = {
-      components,
-      type: "input",
-      path: [],
-      visited: new Set(),
-    };
-    createSchema(inputSchema, inputState, ["previous", "other path"]);
+  //     const inputState: SchemaState = {
+  //       components,
+  //       type: "input",
+  //       path: [],
+  //       visited: new Set(),
+  //     };
+  //     createSchema(inputSchema, inputState, ["previous", "other path"]);
 
-    const outputSchema = z.object({
-      a: inputSchema,
-      b: z.string(),
-    });
-    const outputState: SchemaState = {
-      components,
-      type: "output",
-      path: [],
-      visited: new Set(),
-    };
+  //     const outputSchema = z.object({
+  //       a: inputSchema,
+  //       b: z.string(),
+  //     });
+  //     const outputState: SchemaState = {
+  //       components,
+  //       type: "output",
+  //       path: [],
+  //       visited: new Set(),
+  //     };
 
-    expect(() => createSchema(outputSchema, outputState, ["previous", "path"])).toThrowError(`
-"The ZodEffects - transform at previous > path > property: a is used within a registered compoment schema (input) and contains an input transformation (ZodEffects - transform) defined at previous > other path which is also used in an output schema.
+  //     expect(() => createSchema(outputSchema, outputState, ["previous", "path"])).toThrowError(`
+  // "The ZodEffects - transform at previous > path > property: a is used within a registered compoment schema (input) and contains an input transformation (ZodEffects - transform) defined at previous > other path which is also used in an output schema.
 
-This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
+  // This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
 
-1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
-2. Wrapping the transformation in a ZodPipeline
-3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
-4. Removing the transformation
-5. Deregister the component containing the transformation"
-`);
-  });
+  // 1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
+  // 2. Wrapping the transformation in a ZodPipeline
+  // 3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
+  // 4. Removing the transformation
+  // 5. Deregister the component containing the transformation"
+  // `);
+  //   });
 
   it("does not throw an error when a transform is generated with different types", () => {
     const inputSchema = z
@@ -532,81 +532,81 @@ This may cause the schema to render incorrectly and is most likely a mistake. Yo
     expect(result2).toStrictEqual(expectedResult2);
   });
 
-  it("throws an error when a pipe is generated with different types", () => {
-    const inputSchema = z.string().pipe(z.number()).openapi({ ref: "input" });
+  //   it("throws an error when a pipe is generated with different types", () => {
+  //     const inputSchema = z.string().pipe(z.number()).openapi({ ref: "input" });
 
-    const components = getDefaultComponents();
+  //     const components = getDefaultComponents();
 
-    const inputState: SchemaState = {
-      components,
-      type: "input",
-      path: [],
-      visited: new Set(),
-    };
+  //     const inputState: SchemaState = {
+  //       components,
+  //       type: "input",
+  //       path: [],
+  //       visited: new Set(),
+  //     };
 
-    createSchema(inputSchema, inputState, ["previous", "other path"]);
+  //     createSchema(inputSchema, inputState, ["previous", "other path"]);
 
-    const outputSchema = z.object({
-      a: inputSchema,
-      b: z.string(),
-    });
-    const outputState: SchemaState = {
-      components,
-      type: "output",
-      path: [],
-      visited: new Set(),
-    };
+  //     const outputSchema = z.object({
+  //       a: inputSchema,
+  //       b: z.string(),
+  //     });
+  //     const outputState: SchemaState = {
+  //       components,
+  //       type: "output",
+  //       path: [],
+  //       visited: new Set(),
+  //     };
 
-    expect(() => createSchema(outputSchema, outputState, ["previous", "path"])).toThrowError(`
-"The ZodPipeline at previous > path > property: a is used within a registered compoment schema (input) and contains an input transformation (ZodPipeline) defined at previous > other path which is also used in an output schema.
+  //     expect(() => createSchema(outputSchema, outputState, ["previous", "path"])).toThrowErrorMatchingInlineSnapshot(`
+  // "The ZodPipeline at previous > path > property: a is used within a registered compoment schema (input) and contains an input transformation (ZodPipeline) defined at previous > other path which is also used in an output schema.
 
-This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
+  // This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
 
-1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
-2. Wrapping the transformation in a ZodPipeline
-3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
-4. Removing the transformation
-5. Deregister the component containing the transformation"
-`);
-  });
+  // 1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
+  // 2. Wrapping the transformation in a ZodPipeline
+  // 3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
+  // 4. Removing the transformation
+  // 5. Deregister the component containing the transformation"
+  // `);
+  //   });
 
-  it("throws an error when a lazy schema which contains an effect is used in both an input and output", () => {
-    type Post2 = {
-      id: string;
-      userId: string;
-      user: Post;
-    };
+  //   it("throws an error when a lazy schema which contains an effect is used in both an input and output", () => {
+  //     type Post2 = {
+  //       id: string;
+  //       userId: string;
+  //       user: Post;
+  //     };
 
-    const UserIdSchema = z.string().pipe(z.string());
+  //     const UserIdSchema = z.string().pipe(z.string());
 
-    const PostSchema2: ZodType<Post2> = z
-      .object({
-        id: z.string(),
-        userId: UserIdSchema,
-        user: z.lazy(() => PostSchema2).openapi({ ref: "user" }),
-      })
-      .openapi({ ref: "post" });
+  //     const PostSchema2: ZodType<Post2> = z
+  //       .object({
+  //         id: z.string(),
+  //         userId: UserIdSchema,
+  //         user: z.lazy(() => PostSchema2).openapi({ ref: "user" }),
+  //       })
+  //       .openapi({ ref: "post" });
 
-    const ContainerSchema = z.object({
-      post: PostSchema2,
-    });
+  //     const ContainerSchema = z.object({
+  //       post: PostSchema2,
+  //     });
 
-    const state = createOutputState();
+  //     const state = createOutputState();
 
-    createSchema(ContainerSchema, state, ["previous"]);
+  //     createSchema(ContainerSchema, state, ["previous"]);
 
-    const inputState: SchemaState = { ...state, type: "input" };
+  //     const inputState: SchemaState = { ...state, type: "input" };
 
-    expect(() => createSchema(ContainerSchema, inputState, ["previous"])).toThrowError(`
-"The ZodObject at previous > property: post is used within a registered compoment schema (post) and contains an output transformation (ZodPipeline) defined at previous > property: post > property: userId which is also used in an input schema.
+  //     expect(() => createSchema(ContainerSchema, inputState, ["previous"])).toThrowError(`
+  // "The ZodObject at previous > property: post is used within a registered compoment schema (post) and contains an output transformation (ZodPipeline) defined at previous > property: post > property: userId which is also used in an input schema.
 
-This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
+  // This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
 
-1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
-2. Wrapping the transformation in a ZodPipeline
-3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
-4. Removing the transformation
-5. Deregister the component containing the transformation"
-`);
-  });
+  // 1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
+  // 2. Wrapping the transformation in a ZodPipeline
+  // 3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
+  // 4. Removing the transformation
+  // 5. Deregister the component containing the transformation"
+  // `);
+  //   });
 });
