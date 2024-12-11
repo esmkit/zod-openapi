@@ -1,29 +1,29 @@
-import '../entries/extend';
-import { z } from 'zod';
+import "../entries/extend";
+import { z } from "zod";
 
-import type { oas31 } from '../openapi3-ts/dist';
+import { describe, expect, it } from "bun:test";
+import type { oas31 } from "../openapi3-ts";
+import { getDefaultComponents } from "./components";
+import type { ZodOpenApiPathsObject } from "./document";
+import { createPaths } from "./paths";
 
-import { getDefaultComponents } from './components';
-import type { ZodOpenApiPathsObject } from './document';
-import { createPaths } from './paths';
-
-describe('createPaths', () => {
-  it('should create a paths object', () => {
+describe("createPaths", () => {
+  it("should create a paths object", () => {
     const paths: ZodOpenApiPathsObject = {
-      '/jobs': {
+      "/jobs": {
         get: {
           requestBody: {
             content: {
-              'application/json': {
+              "application/json": {
                 schema: z.object({ a: z.string() }),
               },
             },
           },
           responses: {
-            '200': {
-              description: '200 OK',
+            "200": {
+              description: "200 OK",
               content: {
-                'application/json': {
+                "application/json": {
                   schema: z.object({ b: z.string() }),
                 },
               },
@@ -34,39 +34,39 @@ describe('createPaths', () => {
     };
 
     const expectedResult: oas31.PathsObject = {
-      '/jobs': {
+      "/jobs": {
         get: {
           requestBody: {
             content: {
-              'application/json': {
+              "application/json": {
                 schema: {
                   properties: {
                     a: {
-                      type: 'string',
+                      type: "string",
                     },
                   },
-                  required: ['a'],
-                  type: 'object',
+                  required: ["a"],
+                  type: "object",
                 },
               },
             },
           },
           responses: {
-            '200': {
+            "200": {
               content: {
-                'application/json': {
+                "application/json": {
                   schema: {
                     properties: {
                       b: {
-                        type: 'string',
+                        type: "string",
                       },
                     },
-                    required: ['b'],
-                    type: 'object',
+                    required: ["b"],
+                    type: "object",
                   },
                 },
               },
-              description: '200 OK',
+              description: "200 OK",
             },
           },
         },
@@ -78,69 +78,69 @@ describe('createPaths', () => {
     expect(result).toStrictEqual(expectedResult);
   });
 
-  it('preserves extra fields', () => {
+  it("preserves extra fields", () => {
     const paths: ZodOpenApiPathsObject = {
-      '/jobs': {
+      "/jobs": {
         get: {
-          'x-extra': 'hello',
+          "x-extra": "hello",
           requestBody: {
             content: {
-              'application/json': {
+              "application/json": {
                 schema: z.object({ a: z.string() }),
               },
             },
           },
           responses: {
-            '200': {
-              description: '200 OK',
+            "200": {
+              description: "200 OK",
               content: {
-                'application/json': {
+                "application/json": {
                   schema: z.object({ b: z.string() }),
                 },
               },
             },
           },
-          description: 'hello',
+          description: "hello",
         },
       },
     };
 
     const expectedResult: oas31.PathsObject = {
-      '/jobs': {
+      "/jobs": {
         get: {
-          'x-extra': 'hello',
-          description: 'hello',
+          "x-extra": "hello",
+          description: "hello",
           requestBody: {
             content: {
-              'application/json': {
+              "application/json": {
                 schema: {
                   properties: {
                     a: {
-                      type: 'string',
+                      type: "string",
                     },
                   },
-                  required: ['a'],
-                  type: 'object',
+                  required: ["a"],
+                  type: "object",
                 },
               },
             },
           },
           responses: {
-            '200': {
+            "200": {
               content: {
-                'application/json': {
+                "application/json": {
                   schema: {
                     properties: {
                       b: {
-                        type: 'string',
+                        type: "string",
                       },
                     },
-                    required: ['b'],
-                    type: 'object',
+                    required: ["b"],
+                    type: "object",
                   },
                 },
               },
-              description: '200 OK',
+              description: "200 OK",
             },
           },
         },

@@ -1,24 +1,15 @@
-import type { ZodType } from 'zod';
+import type { ZodType } from "zod";
 
-import type { OpenApiVersion } from '../../openapi';
-import type { oas30, oas31 } from '../../openapi3-ts/dist';
-import {
-  type CreationType,
-  createSchemaComponents,
-  getDefaultComponents,
-} from '../components';
-import type { CreateDocumentOptions } from '../document';
+import type { OpenApiVersion } from "../../openapi";
+import type { oas30, oas31 } from "../../openapi3-ts";
+import { type CreationType, createSchemaComponents, getDefaultComponents } from "../components";
+import type { CreateDocumentOptions } from "../document";
 
-import { type SchemaState, createSchema as internalCreateSchema } from '.';
+import { type SchemaState, createSchema as internalCreateSchema } from ".";
 
 export interface SchemaResult {
   schema: oas30.SchemaObject | oas31.SchemaObject | oas31.ReferenceObject;
-  components?:
-    | Record<
-        string,
-        oas30.SchemaObject | oas31.SchemaObject | oas31.ReferenceObject
-      >
-    | undefined;
+  components?: Record<string, oas30.SchemaObject | oas31.SchemaObject | oas31.ReferenceObject> | undefined;
 }
 
 export interface CreateSchemaOptions extends CreateDocumentOptions {
@@ -40,10 +31,7 @@ export interface CreateSchemaOptions extends CreateDocumentOptions {
   componentRefPath?: string;
 }
 
-export const createSchema = (
-  zodType: ZodType,
-  opts?: CreateSchemaOptions,
-): SchemaResult => {
+export const createSchema = (zodType: ZodType, opts?: CreateSchemaOptions): SchemaResult => {
   const components = getDefaultComponents(
     {
       schemas: opts?.components,
@@ -52,13 +40,13 @@ export const createSchema = (
   );
   const state: SchemaState = {
     components,
-    type: opts?.schemaType ?? 'output',
+    type: opts?.schemaType ?? "output",
     path: [],
     visited: new Set(),
     documentOptions: opts,
   };
 
-  const schema = internalCreateSchema(zodType, state, ['createSchema']);
+  const schema = internalCreateSchema(zodType, state, ["createSchema"]);
 
   const schemaComponents = createSchemaComponents({}, components);
 

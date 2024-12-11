@@ -1,63 +1,41 @@
-import type {
-  ZodEffects,
-  ZodFirstPartyTypeKind,
-  ZodType,
-  ZodTypeAny,
-  input,
-  output,
-} from 'zod';
+import type { ZodEffects, ZodFirstPartyTypeKind, ZodType, ZodTypeAny, input, output } from "zod";
 
-import type { oas31 } from '../../../openapi3-ts/dist';
-import { isZodType } from '../../../zodType';
-import type { Effect, ResolvedEffect } from '../../components';
-import {
-  type Schema,
-  type SchemaState,
-  createSchemaObject,
-} from '../../schema';
+import type { oas31 } from "../../../openapi3-ts";
+import { isZodType } from "../../../zodType";
+import type { Effect, ResolvedEffect } from "../../components";
+import { type Schema, type SchemaState, createSchemaObject } from "../../schema";
 
-export const createTransformSchema = <
-  T extends ZodTypeAny,
-  Output = output<T>,
-  Input = input<T>,
->(
+export const createTransformSchema = <T extends ZodTypeAny, Output = output<T>, Input = input<T>>(
   zodTransform: ZodEffects<T, Output, Input>,
   state: SchemaState,
 ): Schema => {
-  if (zodTransform._def.zodOpenApi?.openapi?.effectType === 'output') {
+  if (zodTransform._def.zodOpenApi?.openapi?.effectType === "output") {
     return {
-      type: 'schema',
+      type: "schema",
       schema: createManualOutputTransformSchema(zodTransform, state),
     };
   }
 
-  if (
-    zodTransform._def.zodOpenApi?.openapi?.effectType === 'input' ||
-    zodTransform._def.zodOpenApi?.openapi?.effectType === 'same'
-  ) {
-    return createSchemaObject(zodTransform._def.schema, state, [
-      'transform input',
-    ]);
+  if (zodTransform._def.zodOpenApi?.openapi?.effectType === "input" || zodTransform._def.zodOpenApi?.openapi?.effectType === "same") {
+    return createSchemaObject(zodTransform._def.schema, state, ["transform input"]);
   }
 
-  if (state.type === 'output') {
+  if (state.type === "output") {
     return {
-      type: 'schema',
+      type: "schema",
       schema: createManualOutputTransformSchema(zodTransform, state),
     };
   }
 
-  const schema = createSchemaObject(zodTransform._def.schema, state, [
-    'transform input',
-  ]);
+  const schema = createSchemaObject(zodTransform._def.schema, state, ["transform input"]);
 
   return {
     ...schema,
     effects: flattenEffects([
       [
         {
-          type: 'schema',
-          creationType: 'input',
+          type: "schema",
+          creationType: "input",
           zodType: zodTransform,
           path: [...state.path],
         },
@@ -67,11 +45,7 @@ export const createTransformSchema = <
   };
 };
 
-export const createManualOutputTransformSchema = <
-  T extends ZodTypeAny,
-  Output = output<T>,
-  Input = input<T>,
->(
+export const createManualOutputTransformSchema = <T extends ZodTypeAny, Output = output<T>, Input = input<T>>(
   zodTransform: ZodEffects<T, Output, Input>,
   state: SchemaState,
 ): oas31.SchemaObject => {
@@ -80,7 +54,7 @@ export const createManualOutputTransformSchema = <
     const schemaName = `${zodType} - ${zodTransform._def.effect.type}`;
     throw new Error(
       `Failed to determine a type for ${schemaName} at ${state.path.join(
-        ' > ',
+        " > ",
       )}. Please change the 'effectType' to 'same' or 'input', wrap it in a ZodPipeline or assign it a manual 'type'.`,
     );
   }
@@ -91,7 +65,7 @@ export const createManualOutputTransformSchema = <
 };
 
 const getZodTypeName = (zodType: ZodType): string => {
-  if (isZodType(zodType, 'ZodEffects')) {
+  if (isZodType(zodType, "ZodEffects")) {
     return `${zodType._def.typeName} - ${zodType._def.effect.type}`;
   }
   return (zodType._def as { typeName: ZodFirstPartyTypeKind }).typeName;
@@ -100,18 +74,12 @@ const getZodTypeName = (zodType: ZodType): string => {
 export const throwTransformError = (effect: ResolvedEffect) => {
   const typeName = getZodTypeName(effect.zodType);
   const input = effect.creationType;
-  const opposite = input === 'input' ? 'output' : 'input';
+  const opposite = input === "input" ? "output" : "input";
   throw new Error(
-    `The ${typeName} at ${effect.path.join(
-      ' > ',
-    )} is used within a registered compoment schema${
-      effect.component ? ` (${effect.component.ref})` : ''
+    `The ${typeName} at ${effect.path.join(" > ")} is used within a registered compoment schema${
+      effect.component ? ` (${effect.component.ref})` : ""
     } and contains an ${input} transformation${
-      effect.component
-        ? ` (${getZodTypeName(
-            effect.component.zodType,
-          )}) defined at ${effect.component.path.join(' > ')}`
-        : ''
+      effect.component ? ` (${getZodTypeName(effect.component.zodType)}) defined at ${effect.component.path.join(" > ")}` : ""
     } which is also used in an ${opposite} schema.
 
 This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
@@ -124,11 +92,8 @@ This may cause the schema to render incorrectly and is most likely a mistake. Yo
   );
 };
 
-const resolveSingleEffect = (
-  effect: Effect,
-  state: SchemaState,
-): ResolvedEffect | undefined => {
-  if (effect.type === 'schema') {
+const resolveSingleEffect = (effect: Effect, state: SchemaState): ResolvedEffect | undefined => {
+  if (effect.type === "schema") {
     return {
       creationType: effect.creationType,
       path: effect.path,
@@ -136,13 +101,13 @@ const resolveSingleEffect = (
     };
   }
 
-  if (effect.type === 'component') {
+  if (effect.type === "component") {
     if (state.visited.has(effect.zodType)) {
       return;
     }
     const component = state.components.schemas.get(effect.zodType);
-    if (component?.type !== 'complete') {
-      throw new Error('Something went wrong, component schema is not complete');
+    if (component?.type !== "complete") {
+      throw new Error("Something went wrong, component schema is not complete");
     }
 
     if (component.resolvedEffect) {
@@ -178,25 +143,18 @@ const resolveSingleEffect = (
   return undefined;
 };
 
-export const resolveEffect = (
-  effects: Effect[],
-  state: SchemaState,
-): ResolvedEffect | undefined => {
+export const resolveEffect = (effects: Effect[], state: SchemaState): ResolvedEffect | undefined => {
   const { input, output } = effects.reduce(
     (acc, effect) => {
       const resolvedSchemaEffect = resolveSingleEffect(effect, state);
-      if (resolvedSchemaEffect?.creationType === 'input') {
+      if (resolvedSchemaEffect?.creationType === "input") {
         acc.input.push(resolvedSchemaEffect);
       }
-      if (resolvedSchemaEffect?.creationType === 'output') {
+      if (resolvedSchemaEffect?.creationType === "output") {
         acc.output.push(resolvedSchemaEffect);
       }
 
-      if (
-        resolvedSchemaEffect &&
-        acc.input.length > 1 &&
-        acc.output.length > 1
-      ) {
+      if (resolvedSchemaEffect && acc.input.length > 1 && acc.output.length > 1) {
         throwTransformError(resolvedSchemaEffect);
       }
       return acc;

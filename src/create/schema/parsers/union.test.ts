@@ -96,7 +96,7 @@ describe("createUnionSchema", () => {
 
     const result = createUnionSchema(schema, createOutputState());
 
-    expect(result).toEqual<Schema>({
+    expect(result).toEqual({
       type: "schema",
       schema: {
         anyOf: [

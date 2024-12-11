@@ -1,21 +1,18 @@
-import type { oas31 } from '../openapi3-ts/dist';
+import type { oas31 } from "../openapi3-ts";
 
-import { createCallbacks } from './callbacks';
-import {
-  type ComponentsObject,
-  createComponentRequestBodyRef,
-} from './components';
-import { createContent } from './content';
+import { createCallbacks } from "./callbacks";
+import { type ComponentsObject, createComponentRequestBodyRef } from "./components";
+import { createContent } from "./content";
 import type {
   CreateDocumentOptions,
   ZodOpenApiOperationObject,
   ZodOpenApiPathItemObject,
   ZodOpenApiPathsObject,
   ZodOpenApiRequestBodyObject,
-} from './document';
-import { createParametersObject } from './parameters';
-import { createResponses } from './responses';
-import { isISpecificationExtension } from './specificationExtension';
+} from "./document";
+import { createParametersObject } from "./parameters";
+import { createResponses } from "./responses";
+import { isISpecificationExtension } from "./specificationExtension";
 
 export const createRequestBody = (
   requestBodyObject: ZodOpenApiRequestBodyObject | undefined,
@@ -28,7 +25,7 @@ export const createRequestBody = (
   }
 
   const component = components.requestBodies.get(requestBodyObject);
-  if (component && component.type === 'complete') {
+  if (component && component.type === "complete") {
     return {
       $ref: createComponentRequestBodyRef(component.ref),
     };
@@ -38,18 +35,12 @@ export const createRequestBody = (
 
   const requestBody: oas31.RequestBodyObject = {
     ...requestBodyObject,
-    content: createContent(
-      requestBodyObject.content,
-      components,
-      'input',
-      [...subpath, 'content'],
-      documentOptions,
-    ),
+    content: createContent(requestBodyObject.content, components, "input", [...subpath, "content"], documentOptions),
   };
 
   if (ref) {
     components.requestBodies.set(requestBodyObject, {
-      type: 'complete',
+      type: "complete",
       ref,
       requestBodyObject: requestBody,
     });
@@ -67,37 +58,15 @@ const createOperation = (
   subpath: string[],
   documentOptions?: CreateDocumentOptions,
 ): oas31.OperationObject | undefined => {
-  const { parameters, requestParams, requestBody, responses, ...rest } =
-    operationObject;
+  const { parameters, requestParams, requestBody, responses, ...rest } = operationObject;
 
-  const maybeParameters = createParametersObject(
-    parameters,
-    requestParams,
-    components,
-    [...subpath, 'parameters'],
-    documentOptions,
-  );
+  const maybeParameters = createParametersObject(parameters, requestParams, components, [...subpath, "parameters"], documentOptions);
 
-  const maybeRequestBody = createRequestBody(
-    operationObject.requestBody,
-    components,
-    [...subpath, 'request body'],
-    documentOptions,
-  );
+  const maybeRequestBody = createRequestBody(operationObject.requestBody, components, [...subpath, "request body"], documentOptions);
 
-  const maybeResponses = createResponses(
-    operationObject.responses,
-    components,
-    [...subpath, 'responses'],
-    documentOptions,
-  );
+  const maybeResponses = createResponses(operationObject.responses, components, [...subpath, "responses"], documentOptions);
 
-  const maybeCallbacks = createCallbacks(
-    operationObject.callbacks,
-    components,
-    [...subpath, 'callbacks'],
-    documentOptions,
-  );
+  const maybeCallbacks = createCallbacks(operationObject.callbacks, components, [...subpath, "callbacks"], documentOptions);
 
   return {
     ...rest,
@@ -114,37 +83,20 @@ export const createPathItem = (
   path: string[],
   documentOptions?: CreateDocumentOptions,
 ): oas31.PathItemObject =>
-  Object.entries(pathObject).reduce<oas31.PathItemObject>(
-    (acc, [key, value]) => {
-      if (!value) {
-        return acc;
-      }
-
-      if (
-        key === 'get' ||
-        key === 'put' ||
-        key === 'post' ||
-        key === 'delete' ||
-        key === 'options' ||
-        key === 'head' ||
-        key === 'patch' ||
-        key === 'trace'
-      ) {
-        acc[key] = createOperation(
-          value as ZodOpenApiOperationObject,
-          components,
-          [...path, key],
-          documentOptions,
-        );
-        return acc;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      acc[key as keyof typeof pathObject] = value;
+  Object.entries(pathObject).reduce<oas31.PathItemObject>((acc, [key, value]) => {
+    if (!value) {
       return acc;
-    },
-    {},
-  );
+    }
+
+    if (key === "get" || key === "put" || key === "post" || key === "delete" || key === "options" || key === "head" || key === "patch" || key === "trace") {
+      acc[key] = createOperation(value as ZodOpenApiOperationObject, components, [...path, key], documentOptions);
+      return acc;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    acc[key as keyof typeof pathObject] = value;
+    return acc;
+  }, {});
 
 export const createPaths = (
   pathsObject: ZodOpenApiPathsObject | undefined,
@@ -155,20 +107,12 @@ export const createPaths = (
     return undefined;
   }
 
-  return Object.entries(pathsObject).reduce<oas31.PathsObject>(
-    (acc, [path, pathItemObject]): oas31.PathsObject => {
-      if (isISpecificationExtension(path)) {
-        acc[path] = pathItemObject;
-        return acc;
-      }
-      acc[path] = createPathItem(
-        pathItemObject,
-        components,
-        [path],
-        documentOptions,
-      );
+  return Object.entries(pathsObject).reduce<oas31.PathsObject>((acc, [path, pathItemObject]): oas31.PathsObject => {
+    if (isISpecificationExtension(path)) {
+      acc[path] = createPathItem(pathItemObject, components, [path], documentOptions);
       return acc;
-    },
-    {},
-  );
+    }
+    acc[path] = createPathItem(pathItemObject, components, [path], documentOptions);
+    return acc;
+  }, {});
 };

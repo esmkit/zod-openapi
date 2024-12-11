@@ -1,16 +1,12 @@
-import { satisfiesVersion } from '../../openapi';
-import type { oas31 } from '../../openapi3-ts/dist';
+import { satisfiesVersion } from "../../openapi";
+import type { oas31 } from "../../openapi3-ts";
 
-import type { RefObject, Schema, SchemaState } from '.';
+import type { RefObject, Schema, SchemaState } from ".";
 
-export const createDescriptionMetadata = (
-  schema: RefObject,
-  description: string,
-  state: SchemaState,
-): Schema => {
-  if (satisfiesVersion(state.components.openapi, '3.1.0')) {
+export const createDescriptionMetadata = (schema: RefObject, description: string, state: SchemaState): Schema => {
+  if (satisfiesVersion(state.components.openapi, "3.1.0")) {
     return {
-      type: 'ref',
+      type: "ref",
       schema: {
         $ref: schema.schema.$ref,
         description,
@@ -22,7 +18,7 @@ export const createDescriptionMetadata = (
   }
 
   return {
-    type: 'schema',
+    type: "schema",
     schema: {
       description,
       allOf: [schema.schema],
@@ -36,11 +32,7 @@ const isValueEqual = (value: unknown, previous: unknown): boolean => {
     return false;
   }
 
-  if (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean'
-  ) {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return value === previous;
   }
 
@@ -57,15 +49,10 @@ const isValueEqual = (value: unknown, previous: unknown): boolean => {
     return value === previous;
   }
 
-  if (typeof value === 'object' && typeof previous === 'object') {
+  if (typeof value === "object" && typeof previous === "object") {
     const keys = Object.keys(value);
 
-    return keys.every((key) =>
-      isValueEqual(
-        (value as Record<string, unknown>)[key],
-        (previous as Record<string, unknown>)[key],
-      ),
-    );
+    return keys.every((key) => isValueEqual((value as Record<string, unknown>)[key], (previous as Record<string, unknown>)[key]));
   }
 
   return value === previous;
@@ -91,7 +78,7 @@ export const enhanceWithMetadata = (
 
   const length = Object.values(values).length;
 
-  if (schema.type === 'ref') {
+  if (schema.type === "ref") {
     if (length === 0) {
       return schema;
     }
@@ -101,7 +88,7 @@ export const enhanceWithMetadata = (
     }
 
     return {
-      type: 'schema',
+      type: "schema",
       schema: {
         allOf: [schema.schema],
         ...metadata,
@@ -111,16 +98,10 @@ export const enhanceWithMetadata = (
   }
 
   // Calculate if we can extend the previous schema
-  if (previous && schema.schema.type !== 'object') {
+  if (previous && schema.schema.type !== "object") {
     const diff = Object.entries({ ...schema.schema, ...values }).reduce(
       (acc, [key, value]) => {
-        if (
-          previous.schemaObject &&
-          isValueEqual(
-            (previous.schemaObject as Record<string, unknown>)[key],
-            value,
-          )
-        ) {
+        if (previous.schemaObject && isValueEqual((previous.schemaObject as Record<string, unknown>)[key], value)) {
           return acc;
         }
         acc[key] = value;
@@ -134,7 +115,7 @@ export const enhanceWithMetadata = (
 
     if (diffLength === 0) {
       return {
-        type: 'ref',
+        type: "ref",
         schema: {
           $ref: previous.schema.$ref,
         },
@@ -144,19 +125,19 @@ export const enhanceWithMetadata = (
       };
     }
 
-    if (diffLength === 1 && typeof diff.description === 'string') {
+    if (diffLength === 1 && typeof diff.description === "string") {
       return createDescriptionMetadata(previous, diff.description, state);
     }
 
     return {
-      type: 'schema',
+      type: "schema",
       schema: { allOf: [previous.schema], ...diff },
       effects: schema.effects,
     };
   }
 
   return {
-    type: 'schema',
+    type: "schema",
     schema: {
       ...schema.schema,
       ...metadata,

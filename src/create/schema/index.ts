@@ -1,18 +1,12 @@
-import type { ZodType, ZodTypeDef } from 'zod';
+import type { ZodType, ZodTypeDef } from "zod";
 
-import type { oas30, oas31 } from '../../openapi3-ts/dist';
-import {
-  type ComponentsObject,
-  type CreationType,
-  type Effect,
-  type SchemaComponent,
-  createComponentSchemaRef,
-} from '../components';
+import type { oas30, oas31 } from "../../openapi3-ts";
+import { type ComponentsObject, type CreationType, type Effect, type SchemaComponent, createComponentSchemaRef } from "../components";
 
-import { enhanceWithMetadata } from './metadata';
-import { createSchemaSwitch } from './parsers';
-import { verifyEffects } from './parsers/transform';
-import type { CreateSchemaOptions } from './single';
+import { enhanceWithMetadata } from "./metadata";
+import { createSchemaSwitch } from "./parsers";
+import { verifyEffects } from "./parsers/transform";
+import type { CreateSchemaOptions } from "./single";
 
 export type LazyMap = Map<ZodType, true>;
 
@@ -24,11 +18,7 @@ export interface SchemaState {
   documentOptions?: CreateSchemaOptions;
 }
 
-export const createNewSchema = <
-  Output = unknown,
-  Def extends ZodTypeDef = ZodTypeDef,
-  Input = Output,
->({
+export const createNewSchema = <Output = unknown, Def extends ZodTypeDef = ZodTypeDef, Input = Output>({
   zodSchema,
   previous,
   state,
@@ -38,40 +28,19 @@ export const createNewSchema = <
   state: SchemaState;
 }): Schema => {
   if (state.visited.has(zodSchema)) {
-    throw new Error(
-      `The schema at ${state.path.join(
-        ' > ',
-      )} needs to be registered because it's circularly referenced`,
-    );
+    throw new Error(`The schema at ${state.path.join(" > ")} needs to be registered because it's circularly referenced`);
   }
   state.visited.add(zodSchema);
-  const {
-    effectType,
-    param,
-    header,
-    ref,
-    refType,
-    unionOneOf,
-    ...additionalMetadata
-  } = zodSchema._def.zodOpenApi?.openapi ?? {};
+  const { effectType, param, header, ref, refType, unionOneOf, ...additionalMetadata } = zodSchema._def.zodOpenApi?.openapi ?? {};
 
   const schema = createSchemaSwitch(zodSchema, previous, state);
 
-  const schemaWithMetadata = enhanceWithMetadata(
-    schema,
-    additionalMetadata,
-    state,
-    previous,
-  );
+  const schemaWithMetadata = enhanceWithMetadata(schema, additionalMetadata, state, previous);
   state.visited.delete(zodSchema);
   return schemaWithMetadata;
 };
 
-export const createNewRef = <
-  Output = unknown,
-  Def extends ZodTypeDef = ZodTypeDef,
-  Input = Output,
->({
+export const createNewRef = <Output = unknown, Def extends ZodTypeDef = ZodTypeDef, Input = Output>({
   previous,
   ref,
   zodSchema,
@@ -83,7 +52,7 @@ export const createNewRef = <
   state: SchemaState;
 }): Schema => {
   state.components.schemas.set(zodSchema, {
-    type: 'in-progress',
+    type: "in-progress",
     ref,
   });
 
@@ -97,25 +66,22 @@ export const createNewRef = <
   });
 
   state.components.schemas.set(zodSchema, {
-    type: 'complete',
+    type: "complete",
     ref,
     schemaObject: newSchema.schema,
     effects: newSchema.effects,
   });
 
   return {
-    type: 'ref',
+    type: "ref",
     schema: {
-      $ref: createComponentSchemaRef(
-        ref,
-        state.documentOptions?.componentRefPath,
-      ),
+      $ref: createComponentSchemaRef(ref, state.documentOptions?.componentRefPath),
     },
     schemaObject: newSchema.schema,
     effects: newSchema.effects
       ? [
           {
-            type: 'component',
+            type: "component",
             zodType: zodSchema,
             path: [...state.path],
           },
@@ -125,29 +91,22 @@ export const createNewRef = <
   };
 };
 
-export const createExistingRef = <
-  Output = unknown,
-  Def extends ZodTypeDef = ZodTypeDef,
-  Input = Output,
->(
+export const createExistingRef = <Output = unknown, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(
   zodSchema: ZodType<Output, Def, Input>,
   component: SchemaComponent | undefined,
   state: SchemaState,
 ): RefObject | undefined => {
-  if (component && component.type === 'complete') {
+  if (component && component.type === "complete") {
     return {
-      type: 'ref',
+      type: "ref",
       schema: {
-        $ref: createComponentSchemaRef(
-          component.ref,
-          state.documentOptions?.componentRefPath,
-        ),
+        $ref: createComponentSchemaRef(component.ref, state.documentOptions?.componentRefPath),
       },
       schemaObject: component.schemaObject,
       effects: component.effects
         ? [
             {
-              type: 'component',
+              type: "component",
               zodType: zodSchema,
               path: [...state.path],
             },
@@ -157,19 +116,16 @@ export const createExistingRef = <
     };
   }
 
-  if (component && component.type === 'in-progress') {
+  if (component && component.type === "in-progress") {
     return {
-      type: 'ref',
+      type: "ref",
       schema: {
-        $ref: createComponentSchemaRef(
-          component.ref,
-          state.documentOptions?.componentRefPath,
-        ),
+        $ref: createComponentSchemaRef(component.ref, state.documentOptions?.componentRefPath),
       },
       schemaObject: undefined,
       effects: [
         {
-          type: 'component',
+          type: "component",
           zodType: zodSchema,
           path: [...state.path],
         },
@@ -186,29 +142,20 @@ export type BaseObject = {
 };
 
 export type RefObject = BaseObject & {
-  type: 'ref';
+  type: "ref";
   schema: oas31.ReferenceObject;
-  schemaObject:
-    | oas31.SchemaObject
-    | oas31.ReferenceObject
-    | oas30.ReferenceObject
-    | oas30.SchemaObject
-    | undefined;
+  schemaObject: oas31.SchemaObject | oas31.ReferenceObject | oas30.ReferenceObject | oas30.SchemaObject | undefined;
   zodType: ZodType;
 };
 
 export type SchemaObject = BaseObject & {
-  type: 'schema';
+  type: "schema";
   schema: oas31.SchemaObject;
 };
 
 export type Schema = SchemaObject | RefObject;
 
-export const createSchemaOrRef = <
-  Output = unknown,
-  Def extends ZodTypeDef = ZodTypeDef,
-  Input = Output,
->(
+export const createSchemaOrRef = <Output = unknown, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(
   zodSchema: ZodType<Output, Def, Input>,
   state: SchemaState,
   onlyRef?: boolean,
@@ -221,24 +168,17 @@ export const createSchemaOrRef = <
   }
 
   const previous = zodSchema._def.zodOpenApi?.previous
-    ? (createSchemaOrRef(zodSchema._def.zodOpenApi.previous, state, true) as
-        | RefObject
-        | undefined)
+    ? (createSchemaOrRef(zodSchema._def.zodOpenApi.previous, state, true) as RefObject | undefined)
     : undefined;
 
   const current =
-    zodSchema._def.zodOpenApi?.current &&
-    zodSchema._def.zodOpenApi.current !== zodSchema
-      ? (createSchemaOrRef(zodSchema._def.zodOpenApi.current, state, true) as
-          | RefObject
-          | undefined)
+    zodSchema._def.zodOpenApi?.current && zodSchema._def.zodOpenApi.current !== zodSchema
+      ? (createSchemaOrRef(zodSchema._def.zodOpenApi.current, state, true) as RefObject | undefined)
       : undefined;
 
   const ref = zodSchema._def.zodOpenApi?.openapi?.ref ?? component?.ref;
   if (ref) {
-    return current
-      ? createNewSchema({ zodSchema, previous: current, state })
-      : createNewRef({ ref, zodSchema, previous, state });
+    return current ? createNewSchema({ zodSchema, previous: current, state }) : createNewRef({ ref, zodSchema, previous, state });
   }
 
   if (onlyRef) {
@@ -248,11 +188,7 @@ export const createSchemaOrRef = <
   return createNewSchema({ zodSchema, previous: previous ?? current, state });
 };
 
-export const createSchemaObject = <
-  Output = unknown,
-  Def extends ZodTypeDef = ZodTypeDef,
-  Input = Output,
->(
+export const createSchemaObject = <Output = unknown, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(
   zodSchema: ZodType<Output, Def, Input>,
   state: SchemaState,
   subpath: string[],
@@ -261,17 +197,13 @@ export const createSchemaObject = <
   const schema = createSchemaOrRef(zodSchema, state);
 
   if (!schema) {
-    throw new Error('Schema does not exist');
+    throw new Error("Schema does not exist");
   }
   state.path.pop();
   return schema;
 };
 
-export const createSchema = <
-  Output = unknown,
-  Def extends ZodTypeDef = ZodTypeDef,
-  Input = Output,
->(
+export const createSchema = <Output = unknown, Def extends ZodTypeDef = ZodTypeDef, Input = Output>(
   zodSchema: ZodType<Output, Def, Input>,
   state: SchemaState,
   subpath: string[],

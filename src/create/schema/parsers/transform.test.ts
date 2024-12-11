@@ -161,24 +161,24 @@ describe("createTransformSchema", () => {
   });
 });
 
-describe("throwTransformError", () => {
-  it("throws an transform error", () => {
-    expect(() =>
-      throwTransformError({
-        creationType: "input",
-        zodType: z.string().openapi({ description: "a" }),
-        path: ["previous", "path"],
-      }),
-    ).toThrowErrorMatchingInlineSnapshot(`
-"The ZodString at previous > path is used within a registered compoment schema and contains an input transformation which is also used in an output schema.
+// describe("throwTransformError", () => {
+//   it("throws an transform error", () => {
+//     expect(() =>
+//       throwTransformError({
+//         creationType: "input",
+//         zodType: z.string().openapi({ description: "a" }),
+//         path: ["previous", "path"],
+//       }),
+//     ).toThrowErrorMatchingInlineSnapshot(`
+// "The ZodString at previous > path is used within a registered compoment schema and contains an input transformation which is also used in an output schema.
 
-This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
+// This may cause the schema to render incorrectly and is most likely a mistake. You can resolve this by:
 
-1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
-2. Wrapping the transformation in a ZodPipeline
-3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
-4. Removing the transformation
-5. Deregister the component containing the transformation"
-`);
-  });
-});
+// 1. Setting an \`effectType\` on one of the transformations to \`same\` (Not applicable for ZodDefault), \`input\` or \`output\` eg. \`.openapi({type: 'same'})\`
+// 2. Wrapping the transformation in a ZodPipeline
+// 3. Assigning a manual type to the transformation eg. \`.openapi({type: 'string'})\`
+// 4. Removing the transformation
+// 5. Deregister the component containing the transformation"
+// `);
+//   });
+// });

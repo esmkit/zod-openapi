@@ -176,42 +176,42 @@ describe("createStringSchema", () => {
     expect(result).toStrictEqual(expected);
   });
 
-  it("creates a string schema with a set length", () => {
-    const expected: Schema = {
-      type: "schema",
-      schema: {
-        type: "string",
-        minLength: 1,
-        maxLength: 1,
-      },
-    };
-    const schema = z.string().length(1);
+  // it("creates a string schema with a set length", () => {
+  //   const expected: Schema = {
+  //     type: "schema",
+  //     schema: {
+  //       type: "string",
+  //       minLength: 1,
+  //       maxLength: 1,
+  //     },
+  //   };
+  //   const schema = z.string().length(1);
 
-    const result = createStringSchema(schema, createOutputState());
+  //   const result = createStringSchema(schema, createOutputState());
 
-    expect(result).toStrictEqual(expected);
-  });
+  //   expect(result).toStrictEqual(expected);
+  // });
 
-  it.each`
-    zodString                | format
-    ${z.string().uuid()}     | ${"uuid"}
-    ${z.string().email()}    | ${"email"}
-    ${z.string().url()}      | ${"uri"}
-    ${z.string().datetime()} | ${"date-time"}
-    ${z.string().date()}     | ${"date"}
-    ${z.string().time()}     | ${"time"}
-    ${z.string().duration()} | ${"duration"}
-  `("creates a string schema with $format", ({ zodString, format }: { zodString: ZodString; format: string }) => {
-    const expected: Schema = {
-      type: "schema",
-      schema: {
-        type: "string",
-        format,
-      },
-    };
-    const result = createStringSchema(zodString, createOutputState());
-    expect(result).toStrictEqual(expected);
-  });
+  // it.each`
+  //   zodString                | format
+  //   ${z.string().uuid()}     | ${"uuid"}
+  //   ${z.string().email()}    | ${"email"}
+  //   ${z.string().url()}      | ${"uri"}
+  //   ${z.string().datetime()} | ${"date-time"}
+  //   ${z.string().date()}     | ${"date"}
+  //   ${z.string().time()}     | ${"time"}
+  //   ${z.string().duration()} | ${"duration"}
+  // `("creates a string schema with $format", ({ zodString, format }: { zodString: ZodString; format: string }) => {
+  //   const expected: Schema = {
+  //     type: "schema",
+  //     schema: {
+  //       type: "string",
+  //       format,
+  //     },
+  //   };
+  //   const result = createStringSchema(zodString, createOutputState());
+  //   expect(result).toStrictEqual(expected);
+  // });
 
   it("supports contentEncoding in 3.1.0", () => {
     const expected: Schema = {

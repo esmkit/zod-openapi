@@ -1,15 +1,9 @@
-import type { oas31 } from '../openapi3-ts/dist';
+import type { oas31 } from "../openapi3-ts";
 
-import {
-  type ComponentsObject,
-  createComponentCallbackRef,
-} from './components';
-import type {
-  CreateDocumentOptions,
-  ZodOpenApiCallbackObject,
-} from './document';
-import { createPathItem } from './paths';
-import { isISpecificationExtension } from './specificationExtension';
+import { type ComponentsObject, createComponentCallbackRef } from "./components";
+import type { CreateDocumentOptions, ZodOpenApiCallbackObject } from "./document";
+import { createPathItem } from "./paths";
+import { isISpecificationExtension } from "./specificationExtension";
 
 export const createCallback = (
   callbackObject: ZodOpenApiCallbackObject,
@@ -19,9 +13,7 @@ export const createCallback = (
 ): oas31.CallbackObject => {
   const { ref, ...callbacks } = callbackObject;
 
-  const callback: oas31.CallbackObject = Object.entries(
-    callbacks,
-  ).reduce<oas31.CallbackObject>((acc, [callbackName, pathItemObject]) => {
+  const callback: oas31.CallbackObject = Object.entries(callbacks).reduce<oas31.CallbackObject>((acc, [callbackName, pathItemObject]) => {
     if (isISpecificationExtension(callbackName)) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       acc[callbackName] = pathItemObject;
@@ -29,7 +21,7 @@ export const createCallback = (
     }
 
     acc[callbackName] = createPathItem(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      // @ts-ignore
       pathItemObject,
       components,
       [...subpath, callbackName],
@@ -40,7 +32,7 @@ export const createCallback = (
 
   if (ref) {
     components.callbacks.set(callbackObject, {
-      type: 'complete',
+      type: "complete",
       ref,
       callbackObject: callback,
     });
@@ -61,23 +53,20 @@ export const createCallbacks = (
   if (!callbacksObject) {
     return undefined;
   }
-  return Object.entries(callbacksObject).reduce<oas31.CallbackObject>(
-    (acc, [callbackName, callbackObject]) => {
-      if (isISpecificationExtension(callbackName)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        acc[callbackName] = callbackObject;
-        return acc;
-      }
-
-      acc[callbackName] = createCallback(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        callbackObject,
-        components,
-        [...subpath, callbackName],
-        documentOptions,
-      );
+  return Object.entries(callbacksObject).reduce<oas31.CallbackObject>((acc, [callbackName, callbackObject]) => {
+    if (isISpecificationExtension(callbackName)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      acc[callbackName] = callbackObject;
       return acc;
-    },
-    {},
-  );
+    }
+
+    acc[callbackName] = createCallback(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      callbackObject,
+      components,
+      [...subpath, callbackName],
+      documentOptions,
+    );
+    return acc;
+  }, {});
 };

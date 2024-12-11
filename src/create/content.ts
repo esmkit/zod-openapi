@@ -1,22 +1,14 @@
-import type { ZodType } from 'zod';
+import type { ZodType } from "zod";
 
-import type { oas31 } from '../openapi3-ts/dist';
-import { isAnyZodType } from '../zodType';
+import type { oas31 } from "../openapi3-ts";
+import { isAnyZodType } from "../zodType";
 
-import type { ComponentsObject, CreationType } from './components';
-import type {
-  CreateDocumentOptions,
-  ZodOpenApiContentObject,
-  ZodOpenApiMediaTypeObject,
-} from './document';
-import { createSchema } from './schema';
+import type { ComponentsObject, CreationType } from "./components";
+import type { CreateDocumentOptions, ZodOpenApiContentObject, ZodOpenApiMediaTypeObject } from "./document";
+import { createSchema } from "./schema";
 
 export const createMediaTypeSchema = (
-  schemaObject:
-    | ZodType
-    | oas31.SchemaObject
-    | oas31.ReferenceObject
-    | undefined,
+  schemaObject: ZodType | oas31.SchemaObject | oas31.ReferenceObject | undefined,
   components: ComponentsObject,
   type: CreationType,
   subpath: string[],
@@ -56,13 +48,7 @@ const createMediaTypeObject = (
 
   return {
     ...mediaTypeObject,
-    schema: createMediaTypeSchema(
-      mediaTypeObject.schema,
-      components,
-      type,
-      [...subpath, 'schema'],
-      documentOptions,
-    ),
+    schema: createMediaTypeSchema(mediaTypeObject.schema, components, type, [...subpath, "schema"], documentOptions),
   };
 };
 
@@ -73,20 +59,11 @@ export const createContent = (
   subpath: string[],
   documentOptions?: CreateDocumentOptions,
 ): oas31.ContentObject =>
-  Object.entries(contentObject).reduce<oas31.ContentObject>(
-    (acc, [mediaType, zodOpenApiMediaTypeObject]): oas31.ContentObject => {
-      const mediaTypeObject = createMediaTypeObject(
-        zodOpenApiMediaTypeObject,
-        components,
-        type,
-        [...subpath, mediaType],
-        documentOptions,
-      );
+  Object.entries(contentObject).reduce<oas31.ContentObject>((acc, [mediaType, zodOpenApiMediaTypeObject]): oas31.ContentObject => {
+    const mediaTypeObject = createMediaTypeObject(zodOpenApiMediaTypeObject, components, type, [...subpath, mediaType], documentOptions);
 
-      if (mediaTypeObject) {
-        acc[mediaType] = mediaTypeObject;
-      }
-      return acc;
-    },
-    {},
-  );
+    if (mediaTypeObject) {
+      acc[mediaType] = mediaTypeObject;
+    }
+    return acc;
+  }, {});
